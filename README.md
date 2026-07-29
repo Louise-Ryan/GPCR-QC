@@ -1,7 +1,9 @@
 # GPCR Classifier
 Python wrapper implementing deeptmhmm to classify GPCR predictions based on the number of detected transmembrane domains.
 Must be executed in the same directory where deeptmhmm is installed.
-Takes only the amino acid fasta file as input.
+
+Takes only the amino acid fasta file as input:
+python3 ClassifyOR.py -i <input_fasta.fa>
 
 Classifications are as follows:
 - 7 TM domains: Complete
