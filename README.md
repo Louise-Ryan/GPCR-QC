@@ -5,6 +5,6 @@ Takes only the amino acid fasta file as input.
 
 Classifications are as follows:
 - 7 TM domains: Complete
-- > 0, < 7 TM domains: Partial
+- \> 0, < 7 TM domains: Partial
 - 0 TM domains: No_TM_domains
-- > 7 TM domains: Putative_fusion
+- \> 7 TM domains: Putative_fusion
