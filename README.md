@@ -4,7 +4,7 @@ Must be executed in the same directory where deeptmhmm is installed.
 
 Takes only the amino acid fasta file as input:
 
-```python3 ClassifyOR.py -i <input_fasta.fa>```
+```python3 Classify_GPCR.py -i <input_fasta.fa>```
 
 <br>
 
