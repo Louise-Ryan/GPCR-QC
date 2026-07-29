@@ -1,6 +1,6 @@
-Input file:
-Olfactory-Receptor-Input-Seqs.fa
+<b>Input file:</b>
+- Olfactory-Receptor-Input-Seqs.fa
 
-Output files:
-Annotated_Sequences_Classified.fa 
-DeepTMHMM-Summary.tsv
+<b>Output files:</b>
+- Annotated_Sequences_Classified.fa #Fasta file annotated with classifications
+- DeepTMHMM-Summary.tsv #Summary TSV file, with seq IDs, seq lengths, no. TMS and classification
