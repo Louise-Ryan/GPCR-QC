@@ -1,9 +1,6 @@
 import argparse
 import os
 import re
-
-from os import system
-
 from Bio import SeqIO
 
 # Parse command-line arguments
