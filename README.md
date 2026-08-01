@@ -1,4 +1,4 @@
-# GPCR Classifier
+# GPCR Quality Control (QC)
 Simple python wrapper implementing deepTMHMM to classify GPCR predictions based on the number of detected transmembrane domains.
 Must be executed in the same directory where deepTMHMM is installed.
 
@@ -10,7 +10,7 @@ https://www.polarmicrobes.org/local-installation-of-deeptmhmm/
 
 Takes only the amino acid fasta file as input:
 
-```python3 Classify_GPCR.py -i <input_fasta.fa>```
+```python3 GPCR-QC.py -i <input_fasta.fa>```
 
 <br>
 
