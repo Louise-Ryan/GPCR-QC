@@ -20,6 +20,9 @@ with open("DeepTMHMM-Summary.tsv", "w") as outfile2:
 #Initiate Fresh output file for classified sequences
 open("Annotated_Sequences_Classified.fa", "w").close()
 
+#Open file to print filtered sequences
+filtered_seqs = open("Filtered_Sequences.fa","w")
+
 # Read the FASTA file and get lengths of sequences
 for record in SeqIO.parse(args.input, "fasta"):
     print(record.id, "\t", len(record.seq))
@@ -37,35 +40,57 @@ for record in SeqIO.parse(args.input, "fasta"):
         text = results.read()
 
     #Pull number of tms from results
-    match = re.search("Number of predicted TMRs\:\s([0-7])", text)
-    #print(match.group(0))  # Entire match
-    #print(match.group(1))  # First capture group
+    match = re.search("Number of predicted TMRs\:\s([0-9]+)", text)
 
-    if match:
+    #Print failed sequence to screen
+    if not match:
+        print(f"Couldn't determine TM domains for {record.id}")
+        number_of_tms = "NA"
+
+    else:
+        #Get number of TM domains and classify
         number_of_tms = int(match.group(1)) #Get number of transmembrane domains
         print("Number of TMs: ",number_of_tms)
 
-    Classification = ""
-    if number_of_tms == 7:
-        Classification = "Complete"
+    classification = ""
+    #If deepTMHMM fails, then NA
+    if number_of_tms == "NA":
+        classification = "NA"
+
+    #If TM = 7, Complete prediction 
+    elif number_of_tms == 7:
+        classification = "Complete"
+
+        #Print complete sequences to filtered file
+        print(">", record.description,
+                " [classification=", classification,
+                "] [DeepTMHMM Domains=", number_of_tms, "]",
+                sep="",
+                file=filtered_seqs
+            )
+        seq = str(record.seq)
+        for i in range(0, len(seq), 80):
+                print(seq[i:i + 80], file=filtered_seqs)
+
+    #Classify incomplete, partial or fusion predictions
     elif number_of_tms > 0 and number_of_tms < 7:
-        Classification = "Partial"
+        classification = "Partial"
     elif number_of_tms > 7:
-        Classification = "Putative_fusion"
+        classification = "Putative_fusion"
     elif number_of_tms == 0:
-        Classification = "No_TM_domains"
+        classification = "No_TM_domains"
 
 
     #Write summary to file
     with open("DeepTMHMM-Summary.tsv", "a") as outfile2:
-        print(record.id, len(record.seq), number_of_tms, Classification, sep="\t", file=outfile2)
+        print(record.description, len(record.seq), number_of_tms, classification, sep="\t", file=outfile2)
 
     #Classify OR in sequence file
     # Write summary to file
     with open("Annotated_Sequences_Classified.fa", "a") as outfile3:
         print(
-            ">", record.id,
-            " [Classification=", Classification,
+            ">", record.description,
+            " [classification=", classification,
             "] [DeepTMHMM Domains=", number_of_tms, "]",
             sep="",
             file=outfile3
@@ -78,3 +103,4 @@ for record in SeqIO.parse(args.input, "fasta"):
     os.system("rm -r DeepTMHMM_Output_Directory/")
     os.system("rm DeepTMHMM_Input.fasta")
 
+filtered_seqs.close()
