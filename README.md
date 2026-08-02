@@ -25,6 +25,7 @@ Takes only the amino acid fasta file as input:
 <b>Output files:</b>
 - Annotated_Sequences_Classified.fa # Fasta file containing input sequences with classification in sequence header
 - DeepTMHMM-Summary.tsv # Sumamry TSV file with sequence ID, length, No. TM domains and Classification
+- Filtered_Sequences.fa # Filtered/clean fasta file containing only sequences with 7 TM domains
 
 <br>
 
