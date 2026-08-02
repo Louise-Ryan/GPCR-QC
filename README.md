@@ -1,7 +1,6 @@
 # 🧬 GPCR Quality Control (QC)
 Python wrapper around DeepTMHMM for quality control and classification of predicted GPCR sequences based on the number of detected transmembrane domains. The pipeline automates DeepTMHMM execution, parses transmembrane domain predictions, and assigns sequences into complete GPCRs (7TM), partial predictions, putative fusions, or sequences lacking predicted transmembrane domains. 
 
-<br>
 
 ---
 
@@ -11,8 +10,6 @@ Python wrapper around DeepTMHMM for quality control and classification of predic
 - [Running the GPCR-QC Pipeline](#running-the-gpcr-qc-pipeline)
 - [GPCR-QC Classification and Output Files](#gpcr-qc-classification-and-output-files)
 - [Citation](#citation)
-
-<br>
 
 --- 
 
