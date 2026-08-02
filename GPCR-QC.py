@@ -1,57 +1,75 @@
 import argparse
-import os
+import subprocess
 import re
 from Bio import SeqIO
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Print sequence IDs and lengths from a FASTA file.")
-parser.add_argument(
-    "-i", "--input",
-    required=True,
-    help="Input FASTA file"
-)
-
+parser.add_argument( "-i", "--input", required=True, help="Input FASTA file")
+parser.add_argument( "-s", "--system", action="store_true", help="Use the system-installed 'deeptmhmm' command instead of the local predict.py script.")
 args = parser.parse_args()
 
 #Prepare fresh summary tsv
-with open("DeepTMHMM-Summary.tsv", "w") as outfile2:
-    print("Sequence ID", "Length", "No. TM Domains", sep="\t", file=outfile2)
+summary_tsv_out = open("DeepTMHMM-Summary.tsv", "w")
+print(
+    "Sequence ID",
+    "Length",
+    "No. TM Domains",
+    "Classification",
+    sep="\t",
+    file=summary_tsv_out
+)
 
 #Initiate Fresh output file for classified sequences
-open("Annotated_Sequences_Classified.fa", "w").close()
+annotated_seqs_out = open("Annotated_Sequences_Classified.fa", "w")
 
-#Open file to print filtered sequences
-filtered_seqs = open("Filtered_Sequences.fa","w")
+#Initiate fresh file to print filtered sequences
+filtered_seqs_out = open("Filtered_Sequences.fa","w")
 
-# Read the FASTA file and get lengths of sequences
-for record in SeqIO.parse(args.input, "fasta"):
-    print(record.id, "\t", len(record.seq))
+#Read in fasta file
+sequences = SeqIO.parse(args.input, "fasta")
 
-    #Write fasta to file
-    with open("DeepTMHMM_Input.fasta", "w") as outfile1:
-        print(">", record.id, record.seq, sep="\n", file=outfile1)
+#Run deeptmmm
+if args.system:
+    subprocess.run(
+        [
+            "deeptmhmm",
+            args.input,
+            "DeepTMHMM_Output_Directory"
+        ],
+        check=True
+    )
+else:
+    subprocess.run(
+        [
+            "python3",
+            "predict.py",
+            "--fasta", args.input,
+            "--output-dir", "DeepTMHMM_Output_Directory"
+        ],
+        check=True
+    )
 
-    #Run deeptmhmm
-    os.system("python3 predict.py --fasta DeepTMHMM_Input.fasta --output-dir DeepTMHMM_Output_Directory")
-    print("DeepTMHMM Complete for ", record.id)
 
-    #Open deeptmhmm results
-    with open("DeepTMHMM_Output_Directory/deeptmhmm_results.md", "r") as results:
-        text = results.read()
+#Parse deeptmhmm results
+deeptmhmm_results = {}
 
-    #Pull number of tms from results
-    match = re.search("Number of predicted TMRs\:\s([0-9]+)", text)
+#Open deeptmhmm results
+with open("DeepTMHMM_Output_Directory/deeptmhmm_results.md", "r") as results:
+    for line in results:
+        tm_match = re.search(r"#\s(\S+)\sNumber\sof\spredicted\sTMRs:\s(\d+)", line)  
+        if tm_match:
+            seqid = tm_match.group(1)
+            number_of_tms = int(tm_match.group(2))
+            deeptmhmm_results[seqid] = number_of_tms
 
-    #Print failed sequence to screen
-    if not match:
-        print(f"Couldn't determine TM domains for {record.id}")
+#Loop through sequences and write to outputfiles
+for seq in sequences:
+    number_of_tms = deeptmhmm_results.get(seq.id)
+    if number_of_tms is None:
         number_of_tms = "NA"
-
-    else:
-        #Get number of TM domains and classify
-        number_of_tms = int(match.group(1)) #Get number of transmembrane domains
-        print("Number of TMs: ",number_of_tms)
-
+        print(f"Couldn't determine TM domains for {seq.id}")
+    
     classification = ""
     #If deepTMHMM fails, then NA
     if number_of_tms == "NA":
@@ -62,15 +80,15 @@ for record in SeqIO.parse(args.input, "fasta"):
         classification = "Complete"
 
         #Print complete sequences to filtered file
-        print(">", record.description,
+        print(">", seq.description,
                 " [classification=", classification,
                 "] [DeepTMHMM Domains=", number_of_tms, "]",
                 sep="",
-                file=filtered_seqs
+                file=filtered_seqs_out
             )
-        seq = str(record.seq)
-        for i in range(0, len(seq), 80):
-                print(seq[i:i + 80], file=filtered_seqs)
+        seq_string = str(seq.seq)
+        for i in range(0, len(seq_string), 80):
+                print(seq_string[i:i + 80], file=filtered_seqs_out)
 
     #Classify incomplete, partial or fusion predictions
     elif number_of_tms > 0 and number_of_tms < 7:
@@ -80,27 +98,27 @@ for record in SeqIO.parse(args.input, "fasta"):
     elif number_of_tms == 0:
         classification = "No_TM_domains"
 
-
     #Write summary to file
-    with open("DeepTMHMM-Summary.tsv", "a") as outfile2:
-        print(record.description, len(record.seq), number_of_tms, classification, sep="\t", file=outfile2)
+    print(seq.description, 
+          len(seq.seq), 
+          number_of_tms, 
+          classification, 
+          sep="\t", 
+          file=summary_tsv_out)
 
     #Classify OR in sequence file
-    # Write summary to file
-    with open("Annotated_Sequences_Classified.fa", "a") as outfile3:
-        print(
-            ">", record.description,
-            " [classification=", classification,
-            "] [DeepTMHMM Domains=", number_of_tms, "]",
-            sep="",
-            file=outfile3
-        )
-        seq = str(record.seq)
-        for i in range(0, len(seq), 80):
-            print(seq[i:i + 80], file=outfile3)
+    print(
+        ">", seq.description,
+        " [classification=", classification,
+        "] [DeepTMHMM Domains=", number_of_tms, "]",
+        sep="",
+        file=annotated_seqs_out
+    )
+    seq_string = str(seq.seq)
+    for i in range(0, len(seq_string), 80):
+        print(seq_string[i:i + 80], file=annotated_seqs_out)
 
-    #Delete deeptmhmm outputs to prepare for next sequence
-    os.system("rm -r DeepTMHMM_Output_Directory/")
-    os.system("rm DeepTMHMM_Input.fasta")
 
-filtered_seqs.close()
+filtered_seqs_out.close()
+summary_tsv_out.close()
+annotated_seqs_out.close()
