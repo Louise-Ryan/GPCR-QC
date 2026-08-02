@@ -15,13 +15,19 @@ Python wrapper around DeepTMHMM for quality control and classification of predic
 
 <a id ="installing-deeptmhmm"></a>
 ## 🛠️ Installing DeepTMHMM
-Official instructions to install deepTMHMM locally can be found here:
+
+**Licensing note:** Please refer to the official DeepTMHMM documentation for licensing details.
+
+**Official instructions to install deepTMHMM locally can be found here:** 
+
 https://dtu.biolib.com/DeepTMHMM/ 
 
-The following guide is also useful for troubleshooting installation:
+**The following guide is also useful for troubleshooting installation:** 
+
 https://www.polarmicrobes.org/local-installation-of-deeptmhmm/ 
 
-<b>Configuring DeepTMHMM to be run from Any Directory (Optional):</b>
+
+**Configuring DeepTMHMM to be run from any directory (Optional):**
 
 By default, this script should be run from the DeepTMHMM installation directory because it calls `predict.py` directly, which expects to find the required DeepTMHMM files in the current directory. To run the script from any location, you can create a wrapper script and add it to your system PATH, as described below:
 
