@@ -55,7 +55,7 @@ else:
 deeptmhmm_results = {}
 
 #Open deeptmhmm results
-with open("DeepTMHMM_Output_Directory/deeptmhmm_results.md", "r") as results:
+with open("DeepTMHMM_Output_Directory/TMRs.gff3", "r") as results:
     for line in results:
         tm_match = re.search(r"#\s(\S+)\sNumber\sof\spredicted\sTMRs:\s(\d+)", line)  
         if tm_match:
