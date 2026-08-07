@@ -2,6 +2,8 @@ import argparse
 import subprocess
 import re
 from Bio import SeqIO
+import random
+import string
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Print sequence IDs and lengths from a FASTA file.")
@@ -26,15 +28,49 @@ annotated_seqs_out = open("Annotated_Sequences_Classified.fa", "w")
 #Initiate fresh file to print filtered sequences
 filtered_seqs_out = open("Filtered_Sequences.fa","w")
 
-#Read in fasta file
-sequences = SeqIO.parse(args.input, "fasta")
+#Check that sequenceIDs are unique
+new_file = None
+sequences = list(SeqIO.parse(args.input, "fasta"))
+
+# Check that sequence IDs are unique
+sequence_ids = [seq.id for seq in sequences]
+if len(sequence_ids) != len(set(sequence_ids)):
+    print(f"Sequence IDs are not unique, there are {len(sequence_ids)} sequences but {len(set(sequence_ids))} unique headers")
+    new_file = args.input + "_unique_identifiers.fa"
+    print(f"Adding unique identifiers and writing to {new_file}")
+    used_ids = set()  # store new IDs
+
+    for seq in sequences:
+        old_id = seq.id
+        old_description = seq.description
+        while True:
+            new_id = "SeqID_" + ''.join(random.choices(string.digits, k=6))
+            if new_id not in used_ids:
+                used_ids.add(new_id)
+                break
+        seq.id = new_id + "_" + old_id
+        seq.description = seq.id + old_description[len(old_id):]
+        
+    # Write updated sequences once
+    with open(new_file, "w") as unique_id_out:
+        SeqIO.write(sequences, unique_id_out, "fasta")
+
+else:
+    print("Sequence IDs are unique, proceed")
+
+#Specify whether to use unique_ID file or orginal file name   
+if new_file:
+    input_file = new_file
+else:
+    input_file = args.input
+
 
 #Run deeptmmm
 if args.system:
     subprocess.run(
         [
             "deeptmhmm",
-            args.input,
+            input_file,
             "DeepTMHMM_Output_Directory"
         ],
         check=True
@@ -44,7 +80,7 @@ else:
         [
             "python3",
             "predict.py",
-            "--fasta", args.input,
+            "--fasta", input_file,
             "--output-dir", "DeepTMHMM_Output_Directory"
         ],
         check=True
