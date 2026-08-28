@@ -90,6 +90,12 @@ else:
 #Parse deeptmhmm results
 deeptmhmm_results = {}
 
+complete = 0
+partial = 0
+fusion = 0
+zero = 0
+na = 0
+
 #Open deeptmhmm results
 with open("DeepTMHMM_Output_Directory/TMRs.gff3", "r") as results:
     for line in results:
@@ -105,15 +111,18 @@ for seq in sequences:
     if number_of_tms is None:
         number_of_tms = "NA"
         print(f"Couldn't determine TM domains for {seq.id}")
+        na +=1
     
     classification = ""
     #If deepTMHMM fails, then NA
     if number_of_tms == "NA":
         classification = "NA"
+        na +=1
 
     #If TM = 7, Complete prediction 
     elif number_of_tms == 7:
         classification = "Complete"
+        complete +=1
 
         #Print complete sequences to filtered file
         print(">", seq.description,
@@ -129,10 +138,13 @@ for seq in sequences:
     #Classify incomplete, partial or fusion predictions
     elif number_of_tms > 0 and number_of_tms < 7:
         classification = "Partial"
+        partial +=1
     elif number_of_tms > 7:
         classification = "Putative_fusion"
+        fusion +=1
     elif number_of_tms == 0:
         classification = "No_TM_domains"
+        zero +=1
 
     #Write summary to file
     print(seq.description, 
@@ -154,6 +166,23 @@ for seq in sequences:
     for i in range(0, len(seq_string), 80):
         print(seq_string[i:i + 80], file=annotated_seqs_out)
 
+removed = partial + fusion + zero + na
+print("\nDeepTMHMM Filtering complete:")
+print("Complete GPCR:", complete)
+print("Partial GPCR:", partial)
+print("Fusion GPCRs:", fusion)
+print("No TMS:", zero)
+
+removed = complete - (partial + fusion + zero)
+print("\nIn total,", removed, "sequences were removed!")
+print("In total,", complete, "sequences are retained!")
+
+print("\nSee the following files for final sequences:")
+print("Filtered sequences: Filtered_Sequences.fa")
+print("Annotated sequences: Annotated_Sequences_Classified.fa")
+print("Summary: DeepTMHMM-Summary.tsv")
+
+print("Complete!")
 
 filtered_seqs_out.close()
 summary_tsv_out.close()
