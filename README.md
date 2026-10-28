@@ -159,7 +159,7 @@ python3 GPCR-QC.py -i <input_fasta.fa> --system
 <a id="citation"></a>
 ## 📄 Citation:
 
-If you use this pipeline, please cite and provide a link to this GitHub repository: [Louise-Ryan/GPCR-QC](https://github.com/Louise-Ryan/GPCR-QC)
+If you find this wrapper useful and would like to credit this tool, you can cite and provide a link to this GitHub repo: [Louise-Ryan/GPCR-QC](https://github.com/Louise-Ryan/GPCR-QC).
 
 If you use **DeepTMHMM** as part of this wrapper, please cite the original authors:
 
